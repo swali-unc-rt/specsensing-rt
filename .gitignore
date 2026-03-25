@@ -39,3 +39,19 @@
 
 # debug information files
 *.dwo
+
+# Makefile binaries
+bin/*
+taskgen/taskgen
+
+# Python generates CSV files for overhead data
+python/*.csv
+python/*.bin
+python/*.sf32
+python/*.float32
+
+# This is the lock namespace/OD for rtspin
+python/rtspin-locks
+
+# where results are stored
+results/*
