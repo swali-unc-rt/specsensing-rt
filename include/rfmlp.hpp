@@ -5,41 +5,42 @@
 #define REPLACE_FSSEI
 
 //#define AMC_FILE_LOCATION "/workspace/amc_rt.trt"
-#define AMC_FILE_LOCATION "/mnt/onr/amc_1x-5120x.trt"
-//#define AMC_FILE_LOCATION "/mnt/onr/trt/amc_1_5.trt"
+//#define AMC_FILE_LOCATION "/mnt/onr/amc_1x-5120x.trt"
+#define AMC_FILE_LOCATION "/mnt/onr/trt2/amc_1_5.trt"
 //#define AMC_FILE_LOCATION "/mnt/onr/trt/amc_201_205.trt"
 //#define AMC_FILE_LOCATION "/mnt/onr/amc_32x-128x.trt"
 //#define AMC_FILE_LOCATION "/mnt/onr/amc_1x-16x.trt"
 #define AMC_INPUT_NAME "input_1"
 #define AMC_OUTPUT_NAME "activation_8"
-#define AMC_MAX 10
+#define AMC_MAX 5
 
 //#define SEI_FILE_LOCATION "/workspace/sei_rt.trt"
 //#define SEI_FILE_LOCATION "/mnt/onr/sei_1x-5120x.trt"
 //#define SEI_FILE_LOCATION "/mnt/onr/trt/sei2_6_10.trt"
-#define SEI_FILE_LOCATION "/mnt/onr/trt/sei2_1_5.trt"
+#define SEI_FILE_LOCATION "/mnt/onr/trt2/sei2_1_5.trt"
 //#define SEI_FILE_LOCATION "/mnt/onr/sei_32x-128x.trt"
 //#define SEI_FILE_LOCATION "/mnt/onr/sei_1x-20x.trt"
 #define SEI_INPUT_NAME "input"
 #define SEI_OUTPUT_NAME "output"
-#define SEI_MAX 20
+#define SEI_MAX 5
 
 //#define GEO_FILE_LOCATION "/mnt/onr/trt/localization_16_20.trt"
-#define GEO_FILE_LOCATION "/mnt/onr/trt/localization_61_65.trt"
+//#define GEO_FILE_LOCATION "/mnt/onr/trt/localization_61_65.trt"
+#define GEO_FILE_LOCATION "/mnt/onr/trt2/localization_1_5.trt"
 //#define GEO_FILE_LOCATION "/mnt/onr/ecrts26/Cellular-Position-Estimation-Using-Deep-Learning/localization.trt"
 #define GEO_INPUT_NAME "x"         // size x 1 x 96
 #define GEO_OUTPUT_NAME "linear_2" // size x 2
-#define GEO_MAX 65
+#define GEO_MAX 5
 
-//#define FSSEI_FILE_LOCATION "/mnt/onr/trt/fssei_1_5.trt"
-#define FSSEI_FILE_LOCATION "/mnt/onr/trt/fssei_41_45.trt"
-//#define FSSEI_FILE_LOCATION "/mnt/onr/fssei_1_2048.trt"
-#define FSSEI_INPUT1_NAME "input_1" // (-1, 4800, 2)
-#define FSSEI_INPUT2_NAME "input_2" // (-1, 1)
-#define FSSEI_OUTPUT1_NAME "Classifier" // (-1, 90)
-#define FSSEI_OUTPUT2_NAME "dense_1" // (-1, 1024)
-#define FSSEI_OUTPUT3_NAME "Center" // (-1,1)
-#define FSSEI_MAX_BATCH_SIZE 2048
+// //#define FSSEI_FILE_LOCATION "/mnt/onr/trt/fssei_1_5.trt"
+// #define FSSEI_FILE_LOCATION "/mnt/onr/trt/fssei_41_45.trt"
+// //#define FSSEI_FILE_LOCATION "/mnt/onr/fssei_1_2048.trt"
+// #define FSSEI_INPUT1_NAME "input_1" // (-1, 4800, 2)
+// #define FSSEI_INPUT2_NAME "input_2" // (-1, 1)
+// #define FSSEI_OUTPUT1_NAME "Classifier" // (-1, 90)
+// #define FSSEI_OUTPUT2_NAME "dense_1" // (-1, 1024)
+// #define FSSEI_OUTPUT3_NAME "Center" // (-1,1)
+// #define FSSEI_MAX_BATCH_SIZE 2048
 
 
 #include <litmus.h>
@@ -130,25 +131,25 @@ public:
     virtual ~GEO() {}
 };
 
-class FSSEI : public RFML {
-public:
-    virtual size_t getOutputSize(size_t inputSize) const override { return inputSize * 90 * sizeof(float); }
-    virtual nvinfer1::Dims getInputDimension(int64_t numInputs) const override { return nvinfer1::Dims3{numInputs, 4800, 2}; }
+// class FSSEI : public RFML {
+// public:
+//     virtual size_t getOutputSize(size_t inputSize) const override { return inputSize * 90 * sizeof(float); }
+//     virtual nvinfer1::Dims getInputDimension(int64_t numInputs) const override { return nvinfer1::Dims3{numInputs, 4800, 2}; }
 
-    virtual bool inference(void* deviceInput, void* deviceOutput, size_t numInputs, cudaStream_t stream, bool doStreamSync) override;
+//     virtual bool inference(void* deviceInput, void* deviceOutput, size_t numInputs, cudaStream_t stream, bool doStreamSync) override;
 
-    FSSEI() : RFML(FSSEI_FILE_LOCATION, FSSEI_INPUT1_NAME, FSSEI_OUTPUT1_NAME) { allocExtraBuffers(); }
-    FSSEI(nvinfer1::ICudaEngine* fsseiEngine) : RFML(fsseiEngine, FSSEI_INPUT1_NAME, FSSEI_OUTPUT1_NAME) { allocExtraBuffers(); }
-    FSSEI(nvinfer1::IExecutionContext* ctx) : RFML(ctx, FSSEI_INPUT1_NAME, FSSEI_OUTPUT1_NAME) { allocExtraBuffers(); }
-    virtual ~FSSEI() { freeExtraBuffers(); }
-private:
-    void* input2DeviceBuffer;
-    void* output2DeviceBuffer;
-    void* output3DeviceBuffer;
+//     FSSEI() : RFML(FSSEI_FILE_LOCATION, FSSEI_INPUT1_NAME, FSSEI_OUTPUT1_NAME) { allocExtraBuffers(); }
+//     FSSEI(nvinfer1::ICudaEngine* fsseiEngine) : RFML(fsseiEngine, FSSEI_INPUT1_NAME, FSSEI_OUTPUT1_NAME) { allocExtraBuffers(); }
+//     FSSEI(nvinfer1::IExecutionContext* ctx) : RFML(ctx, FSSEI_INPUT1_NAME, FSSEI_OUTPUT1_NAME) { allocExtraBuffers(); }
+//     virtual ~FSSEI() { freeExtraBuffers(); }
+// private:
+//     void* input2DeviceBuffer;
+//     void* output2DeviceBuffer;
+//     void* output3DeviceBuffer;
 
-    void allocExtraBuffers();
-    void freeExtraBuffers();
-};
+//     void allocExtraBuffers();
+//     void freeExtraBuffers();
+// };
 
 // in fftman.cu
 int run_batched_fft(float2* d_data, int NUM_BATCHES, int FFT_SIZE_PER_BATCH, cudaStream_t stream);

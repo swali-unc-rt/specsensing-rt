@@ -87,6 +87,10 @@ Node::~Node() {
         worker.join();
 }
 
+void DAG::release_nodes() {
+    litmus_releasegroup_release(releasegroup_id);
+}
+
 void DAG::groupReleaser_fn() {
     if( !period || !releaser_cost ) {
         fprintf(stderr,"ERROR: DAG %d: group releaser started with period/releaser cost at %llu/%llu, will not release\n", id, period, releaser_cost);

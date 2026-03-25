@@ -171,6 +171,8 @@ public:
         }
         return true;
     }
+
+    void release_nodes();
 private:
     int id;
     unsigned int releasegroup_id;
