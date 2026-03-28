@@ -16,6 +16,7 @@ void become_periodic(lt_t exec_cost, lt_t period, lt_t relative_deadline) {
     param.cls = RT_CLASS_SOFT;
     param.budget_policy = NO_ENFORCEMENT;
     param.release_policy = TASK_PERIODIC; // no need to infer sporadic releases
+    param.releasegroup_id = 0; // not in a release group
 
     // Set our parameters and begin real-time mode
     LITMUS_CALL_TID( set_rt_task_param(_tid, &param) );
@@ -62,7 +63,7 @@ void become_rgtask(lt_t exec_cost, lt_t period, lt_t relative_deadline, unsigned
 
     // Set our parameters and begin real-time mode
     LITMUS_CALL_TID( set_rt_task_param(_tid, &param) );
-    LITMUS_CALL_TID( be_migrate_to_cpu(param.cpu) );
+    //LITMUS_CALL_TID( be_migrate_to_cpu(param.cpu) );
     LITMUS_CALL_TID( task_mode(LITMUS_RT_TASK) );
 }
 

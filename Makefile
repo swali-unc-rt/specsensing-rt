@@ -75,6 +75,12 @@ $(OBJ_DIR)/%.o: $(MAIN_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 	@echo "Compiled: $<"
 
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
 # Clean up build artifacts
 clean:
 	rm -f $(wildcard $(OBJ_DIR)/*.o) $(wildcard $(BIN_DIR)/*)

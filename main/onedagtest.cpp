@@ -31,11 +31,11 @@ int main( int argc, char* argv[] ) {
     dag->setReleaserCost( ms2ns(100) );
 
     // Create structure:
-    //     1
-    //    / \
+    //     1  (root)
+    //    / \ 
     //   2   3
-    //    \ /
-    //     4
+    //    \ / 
+    //     4  
     {
         auto node1 = dag->createNode( 1, nullptr, NodeFNs{nodeJob, nullptr, nullptr}, stopper.get_token() );
         auto node2 = dag->createNode( 2, nullptr, NodeFNs{nodeJob, nullptr, nullptr}, stopper.get_token() );
@@ -64,10 +64,15 @@ int main( int argc, char* argv[] ) {
 
     printf("Stopping..\n");
     stopper.request_stop();
+    sleep(4);
+
+    dag->release_nodes(); // ensure all nodes have been released before we begin cleaning up the release group environment
+    sleep(4);
 
     dag.reset(); // ensure DAG is cleaned up before we clean up the release group environment
+    sleep(1);
+    
     litmus_releasegroup_envdestroy();
-
     sleep(4);
 
     // Switch back to Linux scheduler (will clean up GSN-EDF as well)

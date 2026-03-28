@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "litmushelper.hpp"
+#include "Logger.hpp"
 
 using std::shared_ptr;
 using std::stop_token;
@@ -14,19 +15,36 @@ void Node::worker_fn() {
     auto _tid = litmus_gettid();
 
     if( !rtparam.T || !rtparam.C || !rtparam.D) {
-        fprintf(stderr,"ERROR: Node %d: worker started with period/cost/relative deadline at %llu/%llu/%llu, will not run\n", id, rtparam.T, rtparam.C, rtparam.D);
+        //fprintf(stderr,"ERROR: Node %d: worker started with period/cost/relative deadline at %llu/%llu/%llu, will not run\n", id, rtparam.T, rtparam.C, rtparam.D);
+        Log::logerror("ERROR: Node %d: worker started with period/cost/relative deadline at %llu/%llu/%llu, will not run\n", id, rtparam.T, rtparam.C, rtparam.D);
         exit(1);
         return;
     }
 
-    // First, initialize
-    if( fns.init ) {
-        fns.init(this, &processData);
+    if( rtparam.C > rtparam.T ) {
+        Log::logerror("ERROR: Node %d: computation time %llu greater than period %llu, will not run\n", id, rtparam.C, rtparam.T);
+        //exit(1);
+        //return;
+        rtparam.C = rtparam.T / 2;
+    }
+
+    if( rtparam.C > rtparam.D ) {
+        rtparam.C = rtparam.D / 2;
     }
 
     LITMUS_CALL_TID( init_rt_thread() );
 
+    printf("TID %d becoming rt task (%llu,%llu,%llu)\n", litmus_gettid(), rtparam.C / 1000, rtparam.T / 1000, rtparam.D / 1000);
     become_rgtask(rtparam.C, rtparam.T, rtparam.D, dag->getReleaseGroupId() );
+
+    // First, initialize
+    //printf("Calling init function for node %d\n", id);
+    if( fns.init ) {
+        fns.init(this, &processData);
+    }
+
+    workerStartBarrier.arrive_and_wait();
+
     LITMUS_CALL_TID( wait_for_ts_release() );
 
     while( !stopper.stop_requested() ) {
@@ -68,6 +86,9 @@ void Node::worker_fn() {
         fns.cleanup(this, processData);
     }
 
+    for(auto& pipe : outputPipes)
+        pipe->close();
+
     inputPipes.clear();
     outputPipes.clear();
 
@@ -78,7 +99,7 @@ void Node::worker_fn() {
 }
 
 Node::Node(int id, void* extraData, NodeFNs fns, std::shared_ptr<DAG> dag, stop_token stopper)
-    : id(id), extraData(extraData), fns(fns), dag(dag), stopper(stopper), processData(nullptr) {
+    : id(id), extraData(extraData), fns(fns), dag(dag), stopper(stopper), processData(nullptr), workerStartBarrier(2) {
     memset( &rtparam, 0, sizeof(rtparam) );
 }
 
@@ -93,7 +114,8 @@ void DAG::release_nodes() {
 
 void DAG::groupReleaser_fn() {
     if( !period || !releaser_cost ) {
-        fprintf(stderr,"ERROR: DAG %d: group releaser started with period/releaser cost at %llu/%llu, will not release\n", id, period, releaser_cost);
+        //fprintf(stderr,"ERROR: DAG %d: group releaser started with period/releaser cost at %llu/%llu, will not release\n", id, period, releaser_cost);
+        Log::logerror("ERROR: DAG %d: group releaser started with period/releaser cost at %llu/%llu, will not release\n", id, period, releaser_cost);
         exit(1);
         return;
     }
@@ -120,12 +142,34 @@ void DAG::groupReleaser_fn() {
 
 std::shared_ptr<Node> DAG::createNode(int id, void* extraData, NodeFNs fns, stop_token stopper) {
     if( nodes.find(id) != nodes.end() ) {
+        Log::logerror("Error: node with id %d already exists in DAG %d\n", id, this->id);
         throw runtime_error("Node with the same id already exists");
     }
 
     auto node = make_shared<Node>(id, extraData, fns, shared_from_this(), stopper);
     nodes[id] = node;
     return node;
+}
+
+std::shared_ptr<DAG> DAG::makeCopy() {
+    auto copy = make_shared<DAG>(id, extraData, stopper);
+    copy->setPeriod(period);
+    copy->setReleaserCost(releaser_cost);
+    copy->setE2EResponseTime(e2e_R);
+    for( auto& [nid, node] : nodes ) {
+        auto nodeCopy = copy->createNode(nid, node->getExtraData(), node->fns, stopper);
+        nodeCopy->setCost(node->getCost());
+        nodeCopy->setPeriod(node->getPeriod());
+        nodeCopy->setDeadline(node->getDeadline());
+        nodeCopy->setOffset(node->getOffset());
+        nodeCopy->setMaxParentOffset(node->getMaxParentOffset());
+        nodeCopy->setResponseTime(node->getResponseTime());
+    }
+    for( auto& [fromId, toId] : edges ) {
+        copy->addEdge(fromId, toId);
+    }
+    return copy;
+
 }
 
 void DAG::addEdge(int parentId, int childId) {
@@ -163,20 +207,22 @@ Pipe::Pipe() {
 }
 
 Pipe::~Pipe() {
-    close(fds[0]);
-    close(fds[1]);
+    if( fds[0] != -1 )
+        ::close(fds[0]);
+    if( fds[1] != -1 )
+        ::close(fds[1]);
 }
 
 void Pipe::write(char c) {
     //std::lock_guard<std::mutex> lock(mtx);
-    if (::write(fds[1], &c, 1) == -1) {
+    if (fds[1] == -1 || ::write(fds[1], &c, 1) == -1) {
         throw std::runtime_error("Failed to write to pipe");
     }
 }
 
 char Pipe::read() {
     char c;
-    if (::read(fds[0], &c, 1) == -1) {
+    if (fds[0] == -1 || ::read(fds[0], &c, 1) == -1) {
         throw std::runtime_error("Failed to read from pipe");
     }
     return c;
@@ -191,5 +237,16 @@ void Pipe::read(int size, char* buffer) {
             throw std::runtime_error("Failed to read from pipe");
         }
         bytesRead += result;
+    }
+}
+
+void Pipe::close() {
+    if( fds[0] != -1 ) {
+        ::close(fds[0]);
+        fds[0] = -1;
+    }
+    if( fds[1] != -1 ) {
+        ::close(fds[1]);
+        fds[1] = -1;
     }
 }

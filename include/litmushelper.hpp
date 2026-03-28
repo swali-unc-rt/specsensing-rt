@@ -15,25 +15,25 @@
     int _ret;                                       \
     _ret = exp;                                     \
     if (_ret != 0)                                  \
-        fprintf(stderr, "%s failed: %m\n", #exp);   \
+        fprintf(stdout, "%s failed: %m\n", #exp);   \
     else                                            \
-        fprintf(stderr, "%s ok.\n", #exp);          \
+        fprintf(stdout, "%s ok.\n", #exp);          \
 } while (0)
 
 // Calls a litmus function but with a thread id in the output. If the function fails, it also outputs the error message.
-#define LITMUS_CALL_TID( exp ) do {               \
-    int _ret;                                       \
-    _ret = exp;                                     \
-    if (_ret != 0)                                  \
-        fprintf(stderr, "%d: %s failed: %m\n", _tid, #exp);   \
-    else                                            \
-        fprintf(stderr, "%d: %s ok.\n", _tid, #exp );          \
-} while (0)
-
 // #define LITMUS_CALL_TID( exp ) do {               \
 //     int _ret;                                       \
 //     _ret = exp;                                     \
+//     if (_ret != 0)                                  \
+//         fprintf(stderr, "%d: %s failed: %m\n", _tid, #exp);   \
+//     else                                            \
+//         fprintf(stderr, "%d: %s ok.\n", _tid, #exp );          \
 // } while (0)
+
+#define LITMUS_CALL_TID( exp ) do {               \
+    int _ret;                                       \
+    _ret = exp;                                     \
+} while (0)
 
 
 // Become a releasegroup task. rgid cannot be zero. Task will not be immediately released.

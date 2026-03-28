@@ -50,19 +50,22 @@ struct marginalCost {
     lt_t costPerInput;
     unsigned int samplesPerInput;
     unsigned int floatOutsPerInput;
+    int maxBatchSize;
+    int maxTPCcount;
 };
 
-constexpr auto ed_mcost = marginalCost { .initCost = us2ns(193), .costPerInput = us2ns(11), .samplesPerInput = 1024, .floatOutsPerInput = 0 };
-constexpr auto amc_mcost = marginalCost { .initCost = us2ns(507), .costPerInput = us2ns(505), .samplesPerInput = 1024, .floatOutsPerInput = 24 };
-constexpr auto sei_mcost = marginalCost { .initCost = us2ns(1151), .costPerInput = us2ns(1556), .samplesPerInput = 512, .floatOutsPerInput = 4 };
-constexpr auto geo_mcost = marginalCost { .initCost = us2ns(699), .costPerInput = us2ns(47), .samplesPerInput = 96, .floatOutsPerInput = 2 };
-constexpr auto fssei_mcost = marginalCost { .initCost = us2ns(1090), .costPerInput = us2ns(1957), .samplesPerInput = 4800, .floatOutsPerInput = 90 };
-
-constexpr auto maxsms_ed = 1;
+constexpr auto maxsms_ed = 2;
 constexpr auto maxsms_sei = 4;
 constexpr auto maxsms_amc = 4;
 constexpr auto maxsms_geo = 4;
-constexpr auto maxsms_fssei = 8;
+//constexpr auto maxsms_fssei = 8;
+
+constexpr auto ed_mcost = marginalCost { .initCost = ms2ns(193), .costPerInput = ms2ns(11), .samplesPerInput = 1024, .floatOutsPerInput = 0, .maxBatchSize = 0, .maxTPCcount = maxsms_ed };
+constexpr auto amc_mcost = marginalCost { .initCost = ms2ns(507), .costPerInput = ms2ns(505), .samplesPerInput = 1024, .floatOutsPerInput = 24, .maxBatchSize = AMC_MAX, .maxTPCcount = maxsms_amc };
+constexpr auto sei_mcost = marginalCost { .initCost = ms2ns(1151), .costPerInput = ms2ns(1556), .samplesPerInput = 512, .floatOutsPerInput = 4, .maxBatchSize = SEI_MAX, .maxTPCcount = maxsms_sei };
+constexpr auto geo_mcost = marginalCost { .initCost = ms2ns(699), .costPerInput = ms2ns(47), .samplesPerInput = 96, .floatOutsPerInput = 2, .maxBatchSize = GEO_MAX, .maxTPCcount = maxsms_geo };
+//constexpr auto fssei_mcost = marginalCost { .initCost = us2ns(1090), .costPerInput = us2ns(1957), .samplesPerInput = 4800, .floatOutsPerInput = 90, .maxBatchSize = FSSEI_MAX, .maxTPCcount = maxsms_fssei };
+
 
 enum class RFMLType {
     ED,
@@ -86,6 +89,7 @@ public:
 
     virtual size_t getOutputSize(size_t inputSize) const = 0;
     virtual nvinfer1::Dims getInputDimension(int64_t numInputs) const = 0;
+    virtual std::string getModelName() const = 0;
 
     RFML(std::string filename, std::string input_name, std::string output_name);
     RFML(nvinfer1::ICudaEngine* engine, std::string input_name, std::string output_name);
@@ -105,6 +109,7 @@ public:
     AMC(nvinfer1::ICudaEngine* amcEngine) : RFML(amcEngine, AMC_INPUT_NAME, AMC_OUTPUT_NAME) {}
     AMC(nvinfer1::IExecutionContext* ctx) : RFML(ctx, AMC_INPUT_NAME, AMC_OUTPUT_NAME) {}
     virtual ~AMC() {}
+    virtual std::string getModelName() const override { return "AMC"; }
 protected:
 };
 
@@ -117,6 +122,7 @@ public:
     SEI(nvinfer1::ICudaEngine* seiEngine) : RFML(seiEngine, SEI_INPUT_NAME, SEI_OUTPUT_NAME) {}
     SEI(nvinfer1::IExecutionContext* ctx) : RFML(ctx, SEI_INPUT_NAME, SEI_OUTPUT_NAME) {}
     virtual ~SEI() {}
+    virtual std::string getModelName() const override { return "SEI"; }
 protected:
 };
 
@@ -129,6 +135,7 @@ public:
     GEO(nvinfer1::ICudaEngine* geoEngine) : RFML(geoEngine, GEO_INPUT_NAME, GEO_OUTPUT_NAME) {}
     GEO(nvinfer1::IExecutionContext* ctx) : RFML(ctx, GEO_INPUT_NAME, GEO_OUTPUT_NAME) {}
     virtual ~GEO() {}
+    virtual std::string getModelName() const override { return "GEO"; }
 };
 
 // class FSSEI : public RFML {

@@ -7,6 +7,7 @@
 #include <thread>
 #include <map>
 #include <tuple>
+#include <barrier>
 
 #include <litmus.h>
 
@@ -15,6 +16,7 @@ public:
     void write(char c);
     char read();
     void read(int size, char* buffer);
+    void close();
 
     Pipe();
     ~Pipe();
@@ -57,7 +59,7 @@ class DAG;
  * 
  * Once a node is instantiated, you still need to set the node's rtparameters, that is:
  *  WCET, period, relative deadline
- * Once these values are set, the DAG will be able to analyze the node, and set the
+ * Once these values are set, the System will be able to analyze the node, and set the
  *  offset values (O and Omaxparent) and worst-case response time (R) based on the DAG structure.
  */
 class Node {
@@ -70,12 +72,12 @@ public:
     inline void* getExtraData() const { return extraData; }
     inline std::shared_ptr<DAG> getDAG() const { return dag; }
 
-    inline int getCost() const { return rtparam.C; }
-    inline int getPeriod() const { return rtparam.T; }
-    inline int getDeadline() const { return rtparam.D; }
-    inline int getOffset() const { return rtparam.O; }
-    inline int getMaxParentOffset() const { return rtparam.Omaxparent; }
-    inline int getResponseTime() const { return rtparam.R; }
+    inline lt_t getCost() const { return rtparam.C; }
+    inline lt_t getPeriod() const { return rtparam.T; }
+    inline lt_t getDeadline() const { return rtparam.D; }
+    inline lt_t getOffset() const { return rtparam.O; }
+    inline lt_t getMaxParentOffset() const { return rtparam.Omaxparent; }
+    inline lt_t getResponseTime() const { return rtparam.R; }
 
     inline void setCost(lt_t C) { rtparam.C = C; }
     inline void setPeriod(lt_t T) { rtparam.T = T; }
@@ -83,6 +85,8 @@ public:
     inline void setOffset(lt_t O) { rtparam.O = O; }
     inline void setMaxParentOffset(lt_t Omaxparent) { rtparam.Omaxparent = Omaxparent; }
     inline void setResponseTime(lt_t R) { rtparam.R = R; }
+
+    inline bool isSink() const { return outputPipes.empty(); }
 
     void addInputPipe(std::shared_ptr<Pipe> pipe) {
         inputPipes.push_back(pipe);
@@ -94,6 +98,7 @@ public:
 
     void startWorker() {
         worker = std::thread(&Node::worker_fn, this);
+        workerStartBarrier.arrive_and_wait();
     }
 private:
     int id;
@@ -104,6 +109,7 @@ private:
     std::shared_ptr<DAG> dag;
     std::stop_token stopper;
     std::thread worker;
+    std::barrier<> workerStartBarrier;
 
     std::vector<std::shared_ptr<Pipe>> inputPipes;
     std::vector<std::shared_ptr<Pipe>> outputPipes;
@@ -147,6 +153,10 @@ public:
     inline void setReleaserCost(lt_t cost) { releaser_cost = cost; }
     inline lt_t getPeriod() const { return period; }
     inline void setPeriod(lt_t period) { this->period = period; }
+    inline int getId() const { return id; }
+    inline lt_t getE2EResponseTime() const { return e2e_R; }
+    inline void setE2EResponseTime(lt_t R) { e2e_R = R; }
+
 
     std::shared_ptr<Node> createNode(int id, void* extraData, NodeFNs fns, std::stop_token stopper);
 
@@ -173,6 +183,7 @@ public:
     }
 
     void release_nodes();
+    std::shared_ptr<DAG> makeCopy();
 private:
     int id;
     unsigned int releasegroup_id;
@@ -180,6 +191,7 @@ private:
 
     lt_t period;
     lt_t releaser_cost;
+    lt_t e2e_R;
     
     std::map<int, std::shared_ptr<Node>> nodes;
     std::vector<std::pair<int,int>> edges; // fromid, toid
