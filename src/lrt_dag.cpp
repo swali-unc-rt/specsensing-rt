@@ -5,6 +5,7 @@
 
 #include "litmushelper.hpp"
 #include "Logger.hpp"
+#include "RTSystem.hpp"
 
 using std::shared_ptr;
 using std::stop_token;
@@ -47,7 +48,16 @@ void Node::worker_fn() {
 
     LITMUS_CALL_TID( wait_for_ts_release() );
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     while( !stopper.stop_requested() ) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+
+        if( elapsed >= SECONDS_TO_RUN * 2 ) {
+            break;
+        }
+
         // Wait for input from all input pipes
         try {
             for (auto& pipe : inputPipes) {
@@ -85,6 +95,9 @@ void Node::worker_fn() {
     if( fns.cleanup ) {
         fns.cleanup(this, processData);
     }
+
+    for(auto& pipe : inputPipes)
+        pipe->close();
 
     for(auto& pipe : outputPipes)
         pipe->close();
@@ -195,7 +208,7 @@ DAG::DAG(int id, void* extraData, stop_token stopper)
 }
 
 DAG::~DAG() {
-    auto _tid = litmus_gettid();
+    //auto _tid = litmus_gettid();
     if( groupReleaser.joinable() )
         groupReleaser.join();
 }

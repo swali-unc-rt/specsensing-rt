@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     unlink( SMLP_NAMESPACE );
 
     // Set schedule to GSN-EDF
-    system(LIBLITMUS_LIB_DIR "/setsched GSN-EDF");
+    //system(LIBLITMUS_LIB_DIR "/setsched GSN-EDF");
     sleep(3);
     
     auto _tid = litmus_gettid();
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     printf("Starting system..\n");
     rt->start();
 
-    for( int i = 0; i < 20; ++i ) {
+    for( int i = 0; i < 4; ++i ) {
         printf("Threads: %d\n", get_nr_ts_release_waiters() );
         sleep(1);
     }
@@ -76,15 +76,15 @@ int main(int argc, char* argv[]) {
 
     // End the system
     printf("Stopping system..\n");
-    exit(1);
+    //exit(1);
     rt->stop();
     sleep(5);
 
     printf("Cleaning up..\n");
 
-    delete amc;
-    delete sei;
-    delete geo;
+    //delete amc;
+    //delete sei;
+    //delete geo;
     
     //LITMUS_CALL_TID( litmus_releasegroup_envdestroy() );
 

@@ -29,7 +29,7 @@ void RTSystem::createSystem(int numDAGs) {
         auto& dag_nodes = all_nodes[i];
         auto& dag_edges = all_edges[i];
 
-        lt_t chPeriod = s2ns( optEntries[TEST_ITER].chBatches[i] * ed_mcost.samplesPerInput / channel_fs[i] ) * 1000;
+        lt_t chPeriod = s2ns( optEntries[TEST_ITER].chBatches[i] * ed_mcost.samplesPerInput / channel_fs[i] ) * 10;
         //auto dag = new DAG(i, this, stopper.get_token());
         auto dag = make_shared<DAG>(i, this, stopper.get_token());
         dag->setPeriod( chPeriod );
@@ -147,7 +147,7 @@ void RTSystem::stopTimer(std::stop_token stop_tok) {
     LITMUS_CALL_TID( init_rt_thread() );
 
     Log::logthreadname("emergencyStopper", -1, -1, false);
-    become_periodic( us2ns(200), ms2ns(1) );
+    become_periodic( us2ns(200), ms2ns(100) );
 
     auto start = std::chrono::high_resolution_clock::now();
 

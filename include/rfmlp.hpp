@@ -60,10 +60,13 @@ constexpr auto maxsms_amc = 4;
 constexpr auto maxsms_geo = 4;
 //constexpr auto maxsms_fssei = 8;
 
-constexpr auto ed_mcost = marginalCost { .initCost = ms2ns(193), .costPerInput = ms2ns(11), .samplesPerInput = 1024, .floatOutsPerInput = 0, .maxBatchSize = 0, .maxTPCcount = maxsms_ed };
-constexpr auto amc_mcost = marginalCost { .initCost = ms2ns(507), .costPerInput = ms2ns(505), .samplesPerInput = 1024, .floatOutsPerInput = 24, .maxBatchSize = AMC_MAX, .maxTPCcount = maxsms_amc };
-constexpr auto sei_mcost = marginalCost { .initCost = ms2ns(1151), .costPerInput = ms2ns(1556), .samplesPerInput = 512, .floatOutsPerInput = 4, .maxBatchSize = SEI_MAX, .maxTPCcount = maxsms_sei };
-constexpr auto geo_mcost = marginalCost { .initCost = ms2ns(699), .costPerInput = ms2ns(47), .samplesPerInput = 96, .floatOutsPerInput = 2, .maxBatchSize = GEO_MAX, .maxTPCcount = maxsms_geo };
+#define FLAT_COST us2ns(20)
+#define FLAT_COST_PI us2ns(10)
+
+constexpr auto ed_mcost = marginalCost { .initCost = us2ns(193) + FLAT_COST, .costPerInput = us2ns(11) + FLAT_COST_PI, .samplesPerInput = 1024, .floatOutsPerInput = 0, .maxBatchSize = 0, .maxTPCcount = maxsms_ed };
+constexpr auto amc_mcost = marginalCost { .initCost = us2ns(507) + FLAT_COST, .costPerInput = us2ns(505) + FLAT_COST_PI, .samplesPerInput = 1024, .floatOutsPerInput = 24, .maxBatchSize = AMC_MAX, .maxTPCcount = maxsms_amc };
+constexpr auto sei_mcost = marginalCost { .initCost = us2ns(1151) + FLAT_COST, .costPerInput = us2ns(1556) + FLAT_COST_PI, .samplesPerInput = 512, .floatOutsPerInput = 4, .maxBatchSize = SEI_MAX, .maxTPCcount = maxsms_sei };
+constexpr auto geo_mcost = marginalCost { .initCost = us2ns(699) + FLAT_COST, .costPerInput = us2ns(47) + FLAT_COST_PI, .samplesPerInput = 96, .floatOutsPerInput = 2, .maxBatchSize = GEO_MAX, .maxTPCcount = maxsms_geo };
 //constexpr auto fssei_mcost = marginalCost { .initCost = us2ns(1090), .costPerInput = us2ns(1957), .samplesPerInput = 4800, .floatOutsPerInput = 90, .maxBatchSize = FSSEI_MAX, .maxTPCcount = maxsms_fssei };
 
 

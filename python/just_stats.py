@@ -5,7 +5,7 @@ import signal
 import random
 import os
 import csv
-import numpy as np
+#import numpy as np
 
 LIBLITMUS = "../../liblitmus"
 FEATHER_TRACE = "../../feather-trace-tools"
