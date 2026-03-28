@@ -93,6 +93,7 @@ int main(int argc, char* argv[]) {
     sleep(3);
 
     unlink( SMLP_NAMESPACE );
+    exit(1);
     return 0;
 }
 
