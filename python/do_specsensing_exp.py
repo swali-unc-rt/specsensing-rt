@@ -17,7 +17,8 @@ def main():
     taskset = []
     schedname = 'GSN-EDF'
     numpages = 500
-    Duration = 20
+    Duration = 60
+    tracename = 'specsensingrt1'
 
     def cleanup_rtspin(*args):
         for task in taskset:
@@ -34,23 +35,23 @@ def main():
     time.sleep(2.0)
 
     print('starting up tracing framework...')
-    trace = sp.Popen([FEATHER_TRACE + '/st-trace-schedule','specsensingrt1'], stdin=sp.PIPE)
+    trace = sp.Popen([FEATHER_TRACE + '/st-trace-schedule',tracename], stdin=sp.PIPE)
     time.sleep(5.0)
 
     print('starting CPU tasks..')
     for i in range(CPU_TASK_COUNT):
-        task = sp.Popen([LIBLITMUS + '/rtspin', '-w', 'm', str(numpages), '-d', str(CPU_TASK_PERIOD_US/1000000), str(CPU_TASK_COST_US/1000000), str(CPU_TASK_PERIOD_US/1000000), str(Dur)], shell=True)
+        task = sp.Popen([LIBLITMUS + '/rtspin', '-w', 'm', str(numpages), '-d', str(CPU_TASK_PERIOD_US/1000000), str(CPU_TASK_COST_US/1000000), str(CPU_TASK_PERIOD_US/1000000), str(Duration)], shell=True)
         taskset.append(task)
         time.sleep(0.1)
     time.sleep(2)
 
-    print('Starting main program..')
-    mainprogram = sp.Popen(['../bin/specsensing-rt'], shell=True)
-    time.sleep(20)
+    print('Start main program now!')
+    # mainprogram = sp.Popen(['../bin/specsensing-rt'], shell=False)
+    time.sleep(10)
 
-    print('Releasing tasks..')
-    releaser = sp.Popen([LIBLITMUS + '/release_ts', '-q', '1000'])
-    releaser.wait()
+    # print('Releasing tasks..')
+    # releaser = sp.Popen([LIBLITMUS + '/release_ts', '-q', '1000'])
+    # releaser.wait()
 
     print('Experiment running for {} seconds..'.format(Duration))
     time.sleep(Duration)
@@ -64,8 +65,8 @@ def main():
         task.kill()
         time.sleep(1.5)
     time.sleep(3)
-    print('killing main program (if not already)')
-    mainprogram.kill()
+    #print('killing main program (if not already)')
+    #mainprogram.kill()
     time.sleep(1.5)
 
     print('restoring Linux scheduler')
@@ -73,11 +74,11 @@ def main():
     trace.wait()
 
     stats = sp.Popen([FEATHER_TRACE +
-												'/st-job-stats schedule_host=*_trace=test-fsmlp_cpu=*.bin > response_times.csv'], shell=True)
+												'/st-job-stats schedule_host=*_trace='+tracename+'_cpu=*.bin > response_times.csv'], shell=True)
     stats.wait()
     print('Stats finished')
 
-    os.remove('smlp_lock_od') # Clean up lock file
+    #os.remove('smlp_lock_od') # Clean up lock file
 
 
 if __name__ == '__main__':

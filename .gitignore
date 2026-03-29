@@ -56,3 +56,4 @@ python/rtspin-locks
 # where results are stored
 results/*
 *.txt
+smlp_lock_od

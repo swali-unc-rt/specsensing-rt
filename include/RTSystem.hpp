@@ -12,10 +12,10 @@
 
 #include <litmus.h>
 
-#define TEST_ITER 10
+#define TEST_ITER 4
 #define GPU_MAN_TASK_PERIOD_MS 1
-#define SECONDS_TO_RUN 15
-#define LOG_NAME "results/log-10-smlp.csv"
+#define SECONDS_TO_RUN 300
+//#define LOG_NAME "results/log-10-smlp.csv"
 //#define GPCUSE GPC0 | GPC1 | GPC2
 #define SMLP_GPCUSE GPC0 | GPC1 | GPC2 | GPC3 | GPC4 | GPC5 | GPC6
 #define SMLP_NAMESPACE "./smlp_lock_od"

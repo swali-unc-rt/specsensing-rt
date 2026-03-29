@@ -19,7 +19,7 @@ void Log::logthreadname(const char* threadtypename, int dagID, int nodeID, bool 
         threadnamecsv = fopen(RESULTS_FOLDER CSV_THREADNAMES, "w");
         fprintf(threadnamecsv, "threadid, ThreadType, dagid, nodeid, isSink\n");
     }
-    fprintf(threadnamecsv, "%d, %s, %d, %d, %d\n", syscall(SYS_gettid), threadtypename, dagID, nodeID, (int)isSink);
+    fprintf(threadnamecsv, "%ld, %s, %d, %d, %d\n", syscall(SYS_gettid), threadtypename, dagID, nodeID, (int)isSink);
     fflush(threadnamecsv);
 }
 
@@ -34,7 +34,7 @@ void Log::logerror(const char* msg, ...) {
     }
     va_list args;
     va_start(args, msg);
-    fprintf(errorcsv, "%d, ", syscall(SYS_gettid));
+    fprintf(errorcsv, "%ld, ", syscall(SYS_gettid));
     vfprintf(errorcsv, msg, args);
     va_end(args);
     fflush(errorcsv);

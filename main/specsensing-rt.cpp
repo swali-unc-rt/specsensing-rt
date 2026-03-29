@@ -42,12 +42,12 @@ int main(int argc, char* argv[]) {
 
     int smlp_od = open_smlp_sem( SMLP_OD_ID, SMLP_NAMESPACE, SMLP_GPCUSE, 1 );
 
-    printf("Generating signal samples...\n");
+    //printf("Generating signal samples...\n");
     SignalGenerator siggen(10, 2 * INPUTS_TO_USE * 1024, fs, fs/100, fs/3, fs/300, fs/200, 10, 20, 20.0);
     siggen.setSample(0, 1.0);
     siggen.setSample(1, 0.0);
     channel = &siggen;
-    printf("Dry run channel initailization..\n");
+    //printf("Dry run channel initailization..\n");
     CHECK_CUDA( cudaMalloc(&channelBuffer, sizeof(float2) * INPUTS_TO_USE * 1024) );
     CHECK_CUDA( cudaMemcpy(channelBuffer, siggen.getSamples(), sizeof(float2) * INPUTS_TO_USE * 1024, cudaMemcpyHostToDevice) );
     do_dry_gpu_init();
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     rt->stop();
     sleep(5);
 
-    printf("Cleaning up..\n");
+    //printf("Cleaning up..\n");
 
     //delete amc;
     //delete sei;
@@ -88,9 +88,9 @@ int main(int argc, char* argv[]) {
     
     //LITMUS_CALL_TID( litmus_releasegroup_envdestroy() );
 
-    printf("Switching back to Linux scheduler..\n");
-    system(LIBLITMUS_LIB_DIR "/setsched Linux");
-    sleep(3);
+    //printf("Switching back to Linux scheduler..\n");
+    //system(LIBLITMUS_LIB_DIR "/setsched Linux");
+    //sleep(3);
 
     unlink( SMLP_NAMESPACE );
     exit(1);
@@ -99,23 +99,23 @@ int main(int argc, char* argv[]) {
 
 void do_dry_gpu_init() {
     void *pd_ed, *pd_amc, *pd_sei, *pd_geo;
-    printf("Doing dry-run GPU jobs to initialize CUDA context and TensorRT engines...\n");
-    printf("Initializing..\n");
+    //printf("Doing dry-run GPU jobs to initialize CUDA context and TensorRT engines...\n");
+    //printf("Initializing..\n");
     simple_initED(nullptr, &pd_ed);
-    printf("init ED done\n");
+    //printf("init ED done\n");
     simple_initAMC(nullptr, &pd_amc);
     simple_initSEI(nullptr, &pd_sei);
     simple_initGEO(nullptr, &pd_geo);
-    printf("Running CUDA jobs..\n");
+    //printf("Running CUDA jobs..\n");
     simple_jobED(nullptr, pd_ed);
     simple_jobAMC(nullptr, pd_amc);
     simple_jobSEI(nullptr, pd_sei);
     simple_jobGEO(nullptr, pd_geo);
-    printf("Cleaning up..\n");
+    //printf("Cleaning up..\n");
     simple_cleanupED(nullptr, pd_ed);
     simple_cleanupAMC(nullptr, pd_amc);
     simple_cleanupSEI(nullptr, pd_sei);
     simple_cleanupGEO(nullptr, pd_geo);
-    printf("Done with dry-run initialization.\n");
+    //printf("Done with dry-run initialization.\n");
 }
 

@@ -136,7 +136,7 @@ void initED(Node* node, void** processData) {
     CHECK_CUDA( cudaStreamCreate(&data->stream) );
     data->req.stream = &data->stream;
     data->smlp_od = open_smlp_sem( SMLP_OD_ID, SMLP_NAMESPACE, SMLP_GPCUSE, 1 );
-    printf("%d ED (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
+    //printf("%d ED (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
 
     *processData = data;
 }
@@ -164,7 +164,7 @@ void initAMC(Node* node, void** processData) {
     CHECK_CUDA( cudaStreamCreate(&data->stream) );
     data->req.stream = &data->stream;
     data->smlp_od = open_smlp_sem( SMLP_OD_ID, SMLP_NAMESPACE, SMLP_GPCUSE, 1 );
-    printf("%d AMC (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
+    //printf("%d AMC (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
 
     *processData = data;
 }
@@ -192,7 +192,7 @@ void initSEI(Node* node, void** processData) {
     CHECK_CUDA( cudaStreamCreate(&data->stream) );
     data->req.stream = &data->stream;
     data->smlp_od = open_smlp_sem( SMLP_OD_ID, SMLP_NAMESPACE, SMLP_GPCUSE, 1 );
-    printf("%d SEI (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
+    //printf("%d SEI (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
 
     *processData = data;
 }
@@ -220,39 +220,39 @@ void initGEO(Node* node, void** processData) {
     CHECK_CUDA( cudaStreamCreate(&data->stream) );
     data->req.stream = &data->stream;
     data->smlp_od = open_smlp_sem( SMLP_OD_ID, SMLP_NAMESPACE, SMLP_GPCUSE, 1 );
-    printf("%d GEO (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
+    //printf("%d GEO (%llu,%llu,%llu): Opened SMLP semaphore with id %d %lX\n", litmus_gettid(), node->getCost() / 1000, node->getPeriod() / 1000, node->getDeadline() / 1000, data->smlp_od, SMLP_GPCUSE );
 
     *processData = data;
 }
 
 void simple_jobED(Node* node, void* processData) {
-    printf("ED job starting\n");
+    //printf("ED job starting\n");
     jobData *data = static_cast<jobData*>(processData);
     CHECK_CUDA( cudaMemcpyAsync(data->deviceInput, channelBuffer, sizeof(float2) * INPUTS_TO_USE * ed_mcost.samplesPerInput, cudaMemcpyDeviceToDevice, data->stream) );
     run_batched_fft( (float2*)data->deviceInput, INPUTS_TO_USE, ed_mcost.samplesPerInput, data->stream );
     CHECK_CUDA( cudaStreamSynchronize(data->stream) );
-    printf("ED job done\n");
+    //printf("ED job done\n");
 }
 void simple_jobAMC(Node* node, void* processData) {
-    printf("AMC job starting\n");
+    //printf("AMC job starting\n");
     jobData *data = static_cast<jobData*>(processData);
     CHECK_CUDA( cudaMemcpyAsync(data->deviceInput, channelBuffer, sizeof(float2) * INPUTS_TO_USE * amc_mcost.samplesPerInput, cudaMemcpyDeviceToDevice, data->stream) );
     data->model->inference(data->deviceInput, data->deviceOutput, INPUTS_TO_USE, data->stream, true);
-    printf("AMC job done\n");
+    //printf("AMC job done\n");
 }
 void simple_jobSEI(Node* node, void* processData) {
-    printf("SEI job starting\n");
+    //printf("SEI job starting\n");
     jobData *data = static_cast<jobData*>(processData);
     CHECK_CUDA( cudaMemcpyAsync(data->deviceInput, channelBuffer, sizeof(float2) * INPUTS_TO_USE * sei_mcost.samplesPerInput, cudaMemcpyDeviceToDevice, data->stream) );
     data->model->inference(data->deviceInput, data->deviceOutput, INPUTS_TO_USE, data->stream, true);
-    printf("SEI job done\n");
+    //printf("SEI job done\n");
 }
 void simple_jobGEO(Node* node, void* processData) {
-    printf("GEO job starting\n");
+    //printf("GEO job starting\n");
     jobData *data = static_cast<jobData*>(processData);
     CHECK_CUDA( cudaMemcpyAsync(data->deviceInput, channelBuffer, sizeof(float2) * INPUTS_TO_USE * geo_mcost.samplesPerInput, cudaMemcpyDeviceToDevice, data->stream) );
     data->model->inference(data->deviceInput, data->deviceOutput, INPUTS_TO_USE, data->stream, true);
-    printf("GEO job done\n");
+    //printf("GEO job done\n");
 }
 
 void simple_initED(Node* node, void** processData) {
@@ -393,6 +393,8 @@ void simple_cleanupGEO(Node* node, void* processData) {
 void GPUManagementTask(std::stop_token stopper, lt_t releaser_cost, lt_t period, std::shared_ptr<FSMLP> fsmlp) {
     auto _tid = litmus_gettid();
     LITMUS_CALL_TID( init_rt_thread() );
+
+    Log::logthreadname("GPUManager",-1,-1,false);
 
     become_periodic(releaser_cost, period);
     LITMUS_CALL_TID( wait_for_ts_release() );

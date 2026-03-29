@@ -35,7 +35,7 @@ void Node::worker_fn() {
 
     LITMUS_CALL_TID( init_rt_thread() );
 
-    printf("TID %d becoming rt task (%llu,%llu,%llu)\n", litmus_gettid(), rtparam.C / 1000, rtparam.T / 1000, rtparam.D / 1000);
+    //printf("TID %d becoming rt task (%llu,%llu,%llu)\n", litmus_gettid(), rtparam.C / 1000, rtparam.T / 1000, rtparam.D / 1000);
     become_rgtask(rtparam.C, rtparam.T, rtparam.D, dag->getReleaseGroupId() );
 
     // First, initialize
@@ -117,8 +117,8 @@ Node::Node(int id, void* extraData, NodeFNs fns, std::shared_ptr<DAG> dag, stop_
 }
 
 Node::~Node() {
-    if( worker.joinable() )
-        worker.join();
+    //if( worker.joinable() )
+    //    worker.join();
 }
 
 void DAG::release_nodes() {
@@ -209,8 +209,8 @@ DAG::DAG(int id, void* extraData, stop_token stopper)
 
 DAG::~DAG() {
     //auto _tid = litmus_gettid();
-    if( groupReleaser.joinable() )
-        groupReleaser.join();
+    //if( groupReleaser.joinable() )
+    //    groupReleaser.join();
 }
 
 Pipe::Pipe() {

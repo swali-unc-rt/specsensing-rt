@@ -91,7 +91,7 @@ void FSMLP::processQueues() {
 
         // Set the stream mask to the opposite of this
         // because libsmctrl sets 1 as a disabled TPC
-        printf("assigning mask 0x%lx to stream\n", req->smctrl_mask_assigned);
+        //printf("assigning mask 0x%lx to stream\n", req->smctrl_mask_assigned);
         libsmctrl_set_stream_mask( *req->stream, ~req->smctrl_mask_assigned );
 
         // Do the launch
@@ -164,7 +164,7 @@ lt_t FSMLP::submitRequest(//uint64_t smctrl_tpcs_allowed,
 
         // Set the stream mask to the opposite of this
         // because libsmctrl sets 1 as a disabled TPC
-        printf("assigning mask 0x%lx to stream\n", req->smctrl_mask_assigned);
+        //printf("assigning mask 0x%lx to stream\n", req->smctrl_mask_assigned);
         libsmctrl_set_stream_mask( *req->stream, ~req->smctrl_mask_assigned );
         // Do the launch
         //endclock = litmus_clock();

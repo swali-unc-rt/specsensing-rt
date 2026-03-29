@@ -136,6 +136,8 @@ void RTSystem::start() {
 
     gpu_man_task = std::thread( GPUManagementTask, stopper.get_token(), us2ns(100), ms2ns(1), fsmlp );
     timer_thread = std::thread( &RTSystem::stopTimer, this, stopper.get_token() );
+    gpu_man_task.detach();
+    timer_thread.detach();
 }
 
 void RTSystem::stop() {
@@ -156,7 +158,7 @@ void RTSystem::stopTimer(std::stop_token stop_tok) {
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
         if( elapsed >= SECONDS_TO_RUN * 2 ) {
             stopper.request_stop();
-            exit(1);
+            //exit(1);
             break;
         }
 
@@ -188,7 +190,17 @@ void DAGInvoker::periodicRelease() {
 
     LITMUS_CALL_TID( wait_for_ts_release() );
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     while( !stopper.stop_requested() ) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+        if( elapsed >= SECONDS_TO_RUN * 2 ) {
+            //stopper.request_stop();
+            //exit(1);
+            break;
+        }
+
         auto dag = dags.front();
         dags.pop();
         dag->release_nodes();
@@ -203,14 +215,15 @@ void DAGInvoker::periodicRelease() {
 void DAGInvoker::start() {
     periodic_releaser = thread(&DAGInvoker::periodicRelease, this);
     invokeStartBarrier.arrive_and_wait();
+    periodic_releaser.detach();
 }
 
 DAGInvoker::~DAGInvoker() {
-    if( periodic_releaser.joinable() ) {
-        //printf("Joining releaser thread..\n");
-        periodic_releaser.join();
-        //printf("done.\n");
-    }
+    // if( periodic_releaser.joinable() ) {
+    //     //printf("Joining releaser thread..\n");
+    //     //periodic_releaser.join();
+    //     //printf("done.\n");
+    // }
 }
 
 RTSystem* RTSystem::_instance = nullptr;

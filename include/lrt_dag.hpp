@@ -99,6 +99,7 @@ public:
     void startWorker() {
         worker = std::thread(&Node::worker_fn, this);
         workerStartBarrier.arrive_and_wait();
+        worker.detach();
     }
 private:
     int id;
@@ -166,6 +167,7 @@ public:
 
     void startReleaser() {
         groupReleaser = std::thread(&DAG::groupReleaser_fn, this);
+        groupReleaser.detach();
     }
 
     void startAllNodes() {
