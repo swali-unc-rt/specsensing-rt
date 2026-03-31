@@ -43,4 +43,4 @@ void simple_cleanupGEO(Node* node, void* processData);
 
 NodeFNs getNodeFns(RFMLType fntype);
 NodeFNs getNodeFnsSimple(RFMLType fntype);
-void GPUManagementTask(std::stop_token stopper, lt_t releaser_cost, lt_t period, std::shared_ptr<FSMLP> fsmlp);
+void GPUManagementTask(std::stop_token stopper, lt_t releaser_cost, lt_t period, lt_t offset, std::shared_ptr<FSMLP> fsmlp);

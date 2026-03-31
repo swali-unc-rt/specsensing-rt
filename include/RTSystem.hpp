@@ -13,19 +13,32 @@
 #include <litmus.h>
 
 #define TEST_ITER 4
-#define GPU_MAN_TASK_PERIOD_MS 1
+//#define GPU_MAN_TASK_PERIOD_US 500
+#define GPU_MAN_TASK_PERIOD_US 30
+//#define NUM_GPUMGR 4
+#define NUM_GPUMGR 1
 #define SECONDS_TO_RUN 300
 //#define LOG_NAME "results/log-10-smlp.csv"
 //#define GPCUSE GPC0 | GPC1 | GPC2
-#define SMLP_GPCUSE GPC0 | GPC1 | GPC2 | GPC3 | GPC4 | GPC5 | GPC6
+//#define SMLP_GPCUSE GPC0 | GPC1 | GPC2 | GPC3 | GPC4 | GPC5 | GPC6
+//#define SMLP_GPCUSE (1<<6)-1
+//#define FSMLP_GPCUSE (1<<4)-1
+#define FSMLP_GPCUSE (1<<20)-1
+#define SMLP_GPCUSE (1<<5)-1
+//#define SMLP_GPCUSE GPC0 | GPC1 | GPC2 | GPC3
+//#define FSMLP_GPCUSE GPC1 | GPC2 | GPC3 | GPC4 | GPC5 | GPC6
+//#define FSMLP_GPCUSE GPC0 | GPC1 | GPC2 | GPC3 | GPC4 | GPC5 | GPC6
+//#define SMLP_GPCUSE GPC0
+//#define FSMLP_GPCUSE GPC3 | GPC5
+//#define SMLP_GPCUSE GPC0 | GPC1
+//#define FSMLP_GPCUSE GPC2 | GPC3 | GPC4 | GPC5 | GPC6
 #define SMLP_NAMESPACE "./smlp_lock_od"
 #define SMLP_OD_ID 1
-#define LOCK_TYPE_FOR_RUN LockType::SMLP
+#define LOCK_TYPE_FOR_RUN LockType::FSMLP
 
 //#define DO_NO_GPU_WORK
 
 // make this different than the SMLP's flags
-#define FSMLP_GPCUSE GPC0 | GPC1 | GPC2 | GPC3 | GPC4 | GPC5 | GPC6
 
 enum class LockType {
     SMLP,
@@ -101,7 +114,7 @@ private:
 
     LockType lockType;
     std::stop_source stopper;
-    std::thread gpu_man_task;
+    std::thread gpu_man_task[NUM_GPUMGR];
     std::thread timer_thread;
 
     std::vector<std::shared_ptr<DAG>> dags;

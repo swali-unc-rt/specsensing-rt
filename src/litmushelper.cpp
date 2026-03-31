@@ -1,7 +1,8 @@
 #include "litmushelper.hpp"
 
 static int cpu = 0;
-void become_periodic(lt_t exec_cost, lt_t period, lt_t relative_deadline) {
+
+void become_periodic(lt_t offset, lt_t exec_cost, lt_t period, lt_t relative_deadline) {
     struct rt_task param;
     auto _tid = litmus_gettid();
     
@@ -12,7 +13,7 @@ void become_periodic(lt_t exec_cost, lt_t period, lt_t relative_deadline) {
     param.period = period;
 
     param.relative_deadline = relative_deadline;
-    param.phase = 0;
+    param.phase = offset;
     param.cpu = cpu++ % RT_NUM_CPUS; // only relevant for non-global and clustered
     param.cls = RT_CLASS_SOFT;
     param.budget_policy = NO_ENFORCEMENT;
@@ -25,8 +26,12 @@ void become_periodic(lt_t exec_cost, lt_t period, lt_t relative_deadline) {
     LITMUS_CALL_TID( task_mode(LITMUS_RT_TASK) );
 }
 
+void become_periodic(lt_t exec_cost, lt_t period, lt_t relative_deadline) {
+    become_periodic(0, exec_cost, period, relative_deadline);
+}
+
 void become_periodic(lt_t exec_cost, lt_t period) {
-    become_periodic(exec_cost, period, period);
+    become_periodic(0, exec_cost, period, period);
 }
 
 int release_taskset(lt_t delay, lt_t quantum) {

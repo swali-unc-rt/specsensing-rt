@@ -54,7 +54,7 @@ struct marginalCost {
     int maxTPCcount;
 };
 
-constexpr auto maxsms_ed = 2;
+constexpr auto maxsms_ed = 1;
 constexpr auto maxsms_sei = 4;
 constexpr auto maxsms_amc = 4;
 constexpr auto maxsms_geo = 4;

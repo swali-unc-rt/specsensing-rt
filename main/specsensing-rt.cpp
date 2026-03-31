@@ -40,6 +40,8 @@ int main(int argc, char* argv[]) {
     LITMUS_CALL_TID( init_litmus() );
     LITMUS_CALL_TID( litmus_releasegroup_envinit() );
 
+    printf("Main thread id: %d\n", _tid);
+
     int smlp_od = open_smlp_sem( SMLP_OD_ID, SMLP_NAMESPACE, SMLP_GPCUSE, 1 );
 
     //printf("Generating signal samples...\n");
@@ -78,22 +80,30 @@ int main(int argc, char* argv[]) {
     printf("Stopping system..\n");
     //exit(1);
     rt->stop();
+    sleep(1);
+    
+    //Release all group tasks so they can clean up
+    printf("Cleaning up release group tasks..\n");
+    unsigned int rgCounter = DAG::getRgCounter();
+    for( unsigned int i = 1; i < rgCounter; ++i ) {
+        LITMUS_CALL_TID( litmus_releasegroup_release(i) );
+    }
     sleep(5);
 
     //printf("Cleaning up..\n");
-
-    //delete amc;
-    //delete sei;
-    //delete geo;
-    
-    //LITMUS_CALL_TID( litmus_releasegroup_envdestroy() );
+    printf("Destroying release group environment..\n");
+    LITMUS_CALL_TID( litmus_releasegroup_envdestroy() );
 
     //printf("Switching back to Linux scheduler..\n");
     //system(LIBLITMUS_LIB_DIR "/setsched Linux");
     //sleep(3);
 
+    //delete amc;
+    //delete sei;
+    //delete geo;
+
     unlink( SMLP_NAMESPACE );
-    exit(1);
+    //exit(1);
     return 0;
 }
 

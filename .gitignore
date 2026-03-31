@@ -57,3 +57,6 @@ python/rtspin-locks
 results/*
 *.txt
 smlp_lock_od
+python/old/*
+*.csv
+python/*.pdf

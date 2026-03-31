@@ -186,6 +186,8 @@ public:
 
     void release_nodes();
     std::shared_ptr<DAG> makeCopy();
+
+    static unsigned int getRgCounter();
 private:
     int id;
     unsigned int releasegroup_id;

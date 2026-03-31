@@ -390,13 +390,13 @@ void simple_cleanupGEO(Node* node, void* processData) {
         delete (NodeData*)node->getExtraData();
 }
 
-void GPUManagementTask(std::stop_token stopper, lt_t releaser_cost, lt_t period, std::shared_ptr<FSMLP> fsmlp) {
+void GPUManagementTask(std::stop_token stopper, lt_t releaser_cost, lt_t period, lt_t offset, std::shared_ptr<FSMLP> fsmlp) {
     auto _tid = litmus_gettid();
     LITMUS_CALL_TID( init_rt_thread() );
 
     Log::logthreadname("GPUManager",-1,-1,false);
 
-    become_periodic(releaser_cost, period);
+    become_periodic(offset, releaser_cost, period, releaser_cost + us2ns(10) );
     LITMUS_CALL_TID( wait_for_ts_release() );
 
     struct control_page* cpage = get_ctrl_page();

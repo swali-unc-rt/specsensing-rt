@@ -43,6 +43,7 @@ void become_rgtask(lt_t exec_cost, lt_t period, lt_t relative_deadline, unsigned
 // Become a periodic task.
 void become_periodic(lt_t exec_cost, lt_t period);
 void become_periodic(lt_t exec_cost, lt_t period, lt_t relative_deadline);
+void become_periodic(lt_t offset, lt_t exec_cost, lt_t period, lt_t relative_deadline);
 
 // Release the taskset. The taskset will be released after the delay specified, rounded up to the nearest quantum.
 int release_taskset(lt_t delay, lt_t quantum);

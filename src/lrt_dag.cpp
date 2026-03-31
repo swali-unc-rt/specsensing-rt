@@ -200,6 +200,10 @@ void DAG::addEdge(int parentId, int childId) {
 
 static std::atomic<unsigned int> releasegroup_id_counter = 1;
 
+unsigned int DAG::getRgCounter() {
+    return releasegroup_id_counter.load();
+}
+
 DAG::DAG(int id, void* extraData, stop_token stopper)
     : id(id), extraData(extraData), stopper(stopper), period(0), releaser_cost(0) {
     auto _tid = litmus_gettid();

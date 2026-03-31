@@ -7,7 +7,7 @@ TARGETS = $(patsubst $(MAIN_DIR)/%.cpp,%,$(wildcard $(MAIN_DIR)/*.cpp))
 CXX = g++
 NVCC = nvcc
 
-RT_NUM_CPUS=8
+RT_NUM_CPUS=10
 
 # project has an include directory
 PROJECT_INCLUDE_DIR ?= ./include

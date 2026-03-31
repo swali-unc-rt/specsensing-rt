@@ -77,6 +77,7 @@ void RTSystem::createSystem(int numDAGs) {
             newNode->setPeriod( chPeriod );
             newNode->setCost( extraData->mcost.initCost + extraData->mcost.costPerInput * extraData->batchCount );
             newNode->setDeadline( s2ns( optEntries[TEST_ITER].objective ) );
+            //newNode->setDeadline( chPeriod );
         }
 
         // Now add the edges
@@ -134,10 +135,22 @@ void RTSystem::start() {
         invoker->start();
     }
 
-    gpu_man_task = std::thread( GPUManagementTask, stopper.get_token(), us2ns(100), ms2ns(1), fsmlp );
-    timer_thread = std::thread( &RTSystem::stopTimer, this, stopper.get_token() );
-    gpu_man_task.detach();
-    timer_thread.detach();
+    //gpu_man_task[0] = std::thread( GPUManagementTask, stopper.get_token(), us2ns(75), us2ns(GPU_MAN_TASK_PERIOD_US), us2ns(0), fsmlp );
+    //gpu_man_task[1] = std::thread( GPUManagementTask, stopper.get_token(), us2ns(20), us2ns(GPU_MAN_TASK_PERIOD_US), us2ns(25), fsmlp );
+    //gpu_man_task[2] = std::thread( GPUManagementTask, stopper.get_token(), us2ns(20), us2ns(GPU_MAN_TASK_PERIOD_US), us2ns(50), fsmlp );
+    //gpu_man_task[3] = std::thread( GPUManagementTask, stopper.get_token(), us2ns(20), us2ns(GPU_MAN_TASK_PERIOD_US), us2ns(75), fsmlp );
+    //gpu_man_task[4] = std::thread( GPUManagementTask, stopper.get_token(), us2ns(20), us2ns(GPU_MAN_TASK_PERIOD_US), us2ns(100), fsmlp );
+    //timer_thread = std::thread( &RTSystem::stopTimer, this, stopper.get_token() );
+    //gpu_man_task[0].detach();
+    //gpu_man_task[1].detach();
+    //gpu_man_task[2].detach();
+    //gpu_man_task[3].detach();
+    //gpu_man_task[4].detach();
+    //timer_thread.detach();
+
+    for( int i = 0; i < NUM_GPUMGR; ++i ) {
+        gpu_man_task[i] = std::thread( GPUManagementTask, stopper.get_token(), us2ns(10), us2ns(GPU_MAN_TASK_PERIOD_US), i * us2ns(100), fsmlp );
+    }
 }
 
 void RTSystem::stop() {
